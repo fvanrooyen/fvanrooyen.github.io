@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+#header {
+    width: 50%;
+    height: 180px;
+}
+
+#ether {
+    width: 100px;
+    float: left;
+    height: 300px;
+}
+
+#btc {
+    width: 100px;
+    float: left;
+    height: 300px;
+}
+
+#ltc {
+    width: 100px;
+    float: left;
+    height: 300px;
+}
+
+#first {
+    width: 300px;
+    float: left;
+    height: 300px;
+    font-family: sans-serif;
+}
+
+#option {
+    width: 400px;
+    float: left;
+    height: 80px;
+}
+
+#graphdisplay {
+    clear: both;
+}
+
+        
+path { 
+    stroke: steelblue;
+    stroke-width: 1.5;
+    fill: none;
+     }
+        
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+        }
+
+.button {
+  background-color: steelblue; 
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.button1 {
+  background-color: white; 
+  color: black; 
+  border: 2px solid steelblue;
+}
+
+        
+</style>
+
+<body>
+
+
+        <div id="header">
+                <h1><span style="color: #ffb319;"><strong><img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Cryptocurrency_Gold.png" alt="" width="151" height="143" />ryptoCurrency Museum</strong></span></h1>
+        </div>
+
+        <div id="btc">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/64px-Bitcoin.svg.png" alt=""/>
+        </div>
+
+        <div id="ltc">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/LTC-400.png/240px-LTC-400.png" alt="" width="64" height="64"/>
+        </div>
+
+        <div id="ether">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ethereum_logo_2014.svg/65px-Ethereum_logo_2014.svg.png" alt=""/>
+        </div>
+
+
+            <div id="first">
+                    <p><span style="font-weight: 400;">Welcome to the CryptoCurrency Museum where you can see and learn about the evolution of 
+                            Crypto currencies starting with the birth of Bitcoin. Also learn about an alternate coin called Litecoin and then move on to Etherium not just a currency 
+                            but a distributed platform. Once you have taken the time to learn about the coins go ahead and explore their price history by zooming in and out of the data 
+                            to see where you were when history was made! </span></p>
+            </div>
+
+      
+        <div id="option">
+                <input name="BTCButton"   
+                       type="button" 
+                       class="button button1"
+                       value="Bitcoin" 
+                       onclick="updateBTC()" />
+                <input name="LTCButton" 
+                       type="button" 
+                       class="button button1"
+                       value="Litecoin" 
+                       onclick="updateLTC()" />
+
+                <input name="ETHButton" 
+                       type="button" 
+                       class="button button1"
+                       value="Etherium" 
+                       onclick="updateETH()" />
+
+                <input name="CryptoButton" 
+                       type="button" 
+                       class="button button1"
+                       value="Explore!" 
+                       onclick="updateCrypto()" />
+
+            <svg width="1100" height="800" id="graphdisplay"></svg>
+            <svg width="1100" height="800" id="exploredisplay"></svg>
+            </div>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+<script>
+
+    d3.select('#ether').style('display', 'none');
+    d3.select('#btc').style('display', 'none');
+    d3.select('#ltc').style('display', 'none');    
+
+    var margin = {top: 60, right: 30, bottom: 60, left: 100},
+    width = 1000 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+    var x = d3.scaleTime().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+
+    var xAxis = d3.axisBottom(x)
+        .ticks(5);
+    var yAxis = d3.axisLeft(y);
+
+    var valueline = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.close); });
+
+
+    var svg = d3.select("#graphdisplay")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")");
+
+
+    d3.csv("btc.csv", function(error, data) {
+        data.forEach(function(d) {
+            d.date = d3.timeParse("%Y-%m-%d")(d.Date);
+            d.close = +d.Close;
+        });
+
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.close; })]);
+
+    svg.append("path")
+        .attr("class", "line")
+        .attr("d", valueline(data));
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+    });
+
+//BITCOIN SECTION - When the Etherium button is clicked everything below is what will happen 
+function updateBTC() {
+    
+    d3.select("#option").select("#exploredisplay").remove();
+    d3.select("#graphdisplay").style('display', 'block');
+    d3.select("#graphdisplay").select(".annon").remove();
+  
+    d3.select('#btc').style('display', 'block');
+    d3.select('#ltc').style('display', 'none');
+    d3.select('#ether').style('display', 'none');
+    
+    d3.select("#first").select("p").remove();
+    d3.select("#first").insert("p").text("The domain name 'bitcoin.org' was registered on 18 August 2008. On 31 October 2008, a link to a paper authored by Satoshi Nakamoto titled Bitcoin: A Peer-to-Peer Electronic Cash System was posted to a cryptography mailing list. Nakamoto implemented the bitcoin software as open-source code and released it in January 2009. Nakamoto's identity remains unknown.On 3 January 2009, the bitcoin network was created when Nakamoto mined the first block of the chain, known as the genesis block. Embedded in the coinbase of this block was the text 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks'.This note references a headline published by The Times and has been interpreted as both a timestamp and a comment on the instability caused by fractional-reserve banking.The receiver of the first bitcoin transaction was cypherpunk Hal Finney, who had created the first reusable proof-of-work system (RPoW) in 2004. Finney downloaded the bitcoin software on its release date, and on 12 January 2009 received ten bitcoins from Nakamoto. Other early cypherpunk supporters were creators of bitcoin predecessors: Wei Dai, creator of b-money, and Nick Szabo, creator of bit gold. In 2010, the first known commercial transaction using bitcoin occurred when programmer Laszlo Hanyecz bought two Papa John's pizzas for ₿10,000. Blockchain analysts estimate that Nakamoto had mined about one million bitcoins before disappearing in 2010, when he handed the network alert key and control of the code repository over to Gavin Andresen. Andresen later became lead developer at the Bitcoin Foundation. Andresen then sought to decentralize control. This left opportunity for controversy to develop over the future development path of bitcoin, in contrast to the perceived authority of Nakamoto's contributions");
+
+    d3.csv("btc.csv", function(error, data) {
+        data.forEach(function(d) {
+        d.date =d3.timeParse("%Y-%m-%d")(d.Date);
+        d.close = +d.Close;
+    });
+
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.close; })]);
+
+    var svg = d3.select("#graphdisplay").transition();
+
+    svg.select(".line")  
+        .duration(750)
+        .attr("d", valueline(data));
+    svg.select(".x.axis") 
+        .duration(750)
+        .call(xAxis);
+    svg.select(".y.axis")
+        .duration(750)
+        .call(yAxis);
+
+    const annotations = [
+        {
+            id: "BTC High",
+            note: {
+            title: "12-16-2017",
+            label: "Bitcoin reaches record high"
+            },
+            x: 670,
+            y: 65,
+            dy: 25,
+            dx: 40
+        },
+        {
+            id: "Next Big Thing",
+            note: {
+            title: "11-08-2017",
+            label: "Crypto Feaver hits"
+            },
+            x: 650,
+            y: 400,
+            dy: 25,
+            dx: 40
+        },
+        {
+            id: "Crash",
+            type: d3.annotationCalloutCurve,
+            note: {
+            title: "02-12-2018",
+            label: "Bitcoin market crashes"
+            },
+            x: 690,
+            y: 350,
+            dy: -40,
+            dx: -40
+        },
+
+        {
+            id: "wtf",
+            note: {
+                label: "Complete abondonment with a rapid buy spurt",
+                title: "Jan - Feb '18"
+            },
+            x: 890,
+            y: 436,
+            dx: 25, 
+            dy: 115, 
+            subject: {
+              radius: 52,
+              radiusPadding: 5
+            },
+            type: d3.annotationCalloutCircle 
+        },
+    ]
+
+    const makeAnnotations = d3.annotation()
+        .annotations(annotations)
+      
+    d3.select("#graphdisplay")
+     .append("g")
+     .attr("class", "annon")
+     .call(makeAnnotations)
+
+    });
+}
+
+//ETHERIUM SECTION - When the Etherium button is clicked everything below is what will happen 
+function updateETH() {
+    
+    d3.select("#option").select("#exploredisplay").remove();
+    d3.select("#graphdisplay").style('display', 'block');
+    d3.select("#graphdisplay").select(".annon").remove();
+
+    d3.select('#btc').style('display', 'none');
+    d3.select('#ltc').style('display', 'none');
+    d3.select('#ether').style('display', 'block');
+
+    d3.select("#first").select("p").remove();
+    d3.select("#first").insert("p").text("Ethereum is an open source, public, blockchain-based distributed computing platform and operating system featuring smart contract (scripting) functionality. It supports a modified version of Nakamoto consensus via transaction-based state transitions.Ether is a token whose blockchain is generated by the Ethereum platform. Ether can be transferred between accounts and used to compensate participant mining nodes for computations performed. Ethereum provides a decentralized virtual machine, the Ethereum Virtual Machine (EVM), which can execute scripts using an international network of public nodes. The virtual machine's instruction set, in contrast to others like Bitcoin Script, is thought to be Turing-complete. Gas, an internal transaction pricing mechanism, is used to mitigate spam and allocate resources on the network.Ethereum was proposed in late 2013 by Vitalik Buterin, a cryptocurrency researcher and programmer. Development was funded by an online crowdsale that took place between July and August 2014.[4] The system then went live on 30 July 2015, with 72 million coins premined. This accounts for about 68 percent of the total circulating supply in 2019."); 
+
+
+    d3.csv("eth.csv", function(error, data) {
+        data.forEach(function(d) {
+        d.date =d3.timeParse("%Y-%m-%d")(d.Date);
+        d.close = +d.Close;
+    });
+
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.close; })]);
+
+    var svg = d3.select("#graphdisplay").transition();
+
+    svg.select(".line")   
+        .duration(750)
+        .attr("d", valueline(data));
+    svg.select(".x.axis") 
+        .duration(750)
+        .call(xAxis);
+    svg.select(".y.axis") 
+        .duration(750)
+        .call(yAxis);
+
+    const annotations = [
+          {
+            id: "High",
+            note: {
+              title: "01/13/2018",  
+              label: "Etherium reaches record high"
+            },
+            x: 550,
+            y: 65,
+            dy: 25,
+            dx: 30
+          },
+          {
+            id: "Platform",
+            note: {
+              title: "06/14/2017",  
+              label: "Etherium is seen as a platform for the next generation of application"
+            },
+            x: 385,
+            y: 405,
+            dy: -25,
+            dx: -30
+          },
+          {
+            id: " networkissues",
+            note: {
+                label: "Etherium Network Slowdowns and issues",
+                title: "Aug - Oct '18"
+            },
+            x: 790,
+            y: 486,
+            dx: 25, 
+            dy: 115, 
+            subject: {
+              radius: 52,
+              radiusPadding: 5
+            },
+            type: d3.annotationCalloutCircle 
+        },
+        ]
+
+    const makeAnnotations = d3.annotation()
+          .annotations(annotations)
+
+    d3.select("#graphdisplay")
+    .append("g")
+    .attr("class", "annon")
+    .call(makeAnnotations)
+
+    });
+
+}
+
+//LITECOIN SECTION - When the LiteCoin button is clicked everything below is what will happen 
+function updateLTC() {
+     
+    d3.select("#option").select("#exploredisplay").remove();
+    d3.select("#graphdisplay").style('display', 'block');
+    d3.select("#graphdisplay").select(".annon").remove();
+
+    d3.select('#btc').style('display', 'none');
+    d3.select('#ltc').style('display', 'block');
+    d3.select('#ether').style('display', 'none');
+    
+    d3.select("#first").select("p").remove();
+    d3.select("#first").insert("p").text("Litecoin was released via an open-source client on GitHub on October 7, 2011 by Charlie Lee, a Google employee and former Engineering Director at Coinbase. The Litecoin network went live on October 13, 2011. It was a fork of the Bitcoin Core client, differing primarily by having a decreased block generation time (2.5 minutes), increased maximum number of coins, different hashing algorithm (scrypt, instead of SHA-256), and a slightly modified GUI. During the month of November 2013, the aggregate value of Litecoin experienced massive growth which included a 100% leap within 24 hours. In May 2017, Litecoin became the first of the top 5 (by market cap) cryptocurrencies to adopt Segregated Witness. Later in May of the same year, the first Lightning Network transaction was completed through Litecoin, transferring 0.00000001 LTC from Zürich to San Francisco in under one second.");
+
+    d3.csv("ltc.csv", function(error, data) {
+        data.forEach(function(d) {
+        d.date =d3.timeParse("%Y-%m-%d")(d.Date);
+        d.close = +d.Close;
+    });
+
+  x.domain(d3.extent(data, function(d) { return d.date; }));
+  y.domain([0, d3.max(data, function(d) { return d.close; })]);
+
+    var svg = d3.select("#graphdisplay").transition();
+
+    svg.select(".line")   
+        .duration(750)
+        .attr("d", valueline(data));
+    svg.select(".x.axis") 
+        .duration(750)
+        .call(xAxis);
+    svg.select(".y.axis") 
+        .duration(750)
+        .call(yAxis);
+
+
+    const annotations = [
+          {
+            id: "high",
+            note: {
+              title: "12-20-2017",  
+              label: "LiteCoin reaches record high"
+            },
+            x: 493,
+            y: 65,
+            dy: 25,
+            dx: 30
+          },
+          {
+            id: "leap",
+            note: {
+              title: "11-05-2017",  
+              label: "The Great Leap!"
+            },
+            x: 485,
+            y: 410,
+            dy: 25,
+            dx: 30
+          }
+        ]
+
+    const makeAnnotations = d3.annotation()
+          .annotations(annotations)
+
+    d3.select("#graphdisplay")
+    .append("g")
+    .attr("class", "annon")
+    .call(makeAnnotations)
+
+    });
+
+}
+</script>
+<script>
+//EXPLORE SECTION
+function updateCrypto() {
+
+d3.select("#graphdisplay").style('display', 'none');
+d3.select("#option").select("#exploredisplay").remove();
+
+d3.select("#option").append("svg")
+.attr( "id","exploredisplay")
+.attr("width", 1100)
+.attr("height", 800);
+
+d3.select('#btc').style('display', 'block');
+d3.select('#ltc').style('display', 'none');
+d3.select('#ether').style('display', 'none');
+
+d3.select("#first").select("p").remove();
+d3.select("#first").insert("p").text("Now that you have learned about the different Crypto versions and their history feel free to explore the Bitcoin data, you can zoom in by selecting the data that you want to know more about, and then double click on the graph if you want");
+
+var margin = {top: 60, right: 30, bottom: 60, left: 100},
+    width = 1000 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+var svg = d3.select("#exploredisplay")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("btc.csv",
+function(d){
+  return { date : d3.timeParse("%Y-%m-%d")(d.Date), value : d.Close }
+},
+
+function(data) {
+
+var x = d3.scaleTime()
+  .domain(d3.extent(data, function(d) { return d.date; }))
+  .range([ 0, width ]);
+var xAxis = svg.append("g")
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x));
+
+var y = d3.scaleLinear()
+  .domain([0, d3.max(data, function(d) { return +d.value; })])
+  .range([ height, 0 ]);
+var yAxis = svg.append("g")
+  .call(d3.axisLeft(y));
+
+var clip = svg.append("defs").append("svg:clipPath")
+    .attr("id", "clip")
+    .append("svg:rect")
+    .attr("width", width )
+    .attr("height", height )
+    .attr("x", 0)
+    .attr("y", 0);
+
+var brush = d3.brushX()                   
+    .extent( [ [0,0], [width,height] ] )  
+    .on("end", updateChart)             
+
+var line = svg.append('g')
+  .attr("clip-path", "url(#clip)")
+
+line.append("path")
+  .datum(data)
+  .attr("class", "line") 
+  .attr("fill", "none")
+  .attr("stroke", "steelblue")
+  .attr("stroke-width", 1.5)
+  .attr("d", d3.line()
+    .x(function(d) { return x(d.date) })
+    .y(function(d) { return y(d.value) })
+    )
+
+line
+  .append("g")
+    .attr("class", "brush")
+    .call(brush);
+
+var idleTimeout
+function idled() { idleTimeout = null; }
+
+function updateChart() {
+
+  extent = d3.event.selection
+
+  if(!extent){
+    if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); 
+    x.domain([ 4,8])
+  }else{
+    x.domain([ x.invert(extent[0]), x.invert(extent[1]) ])
+    line.select(".brush").call(brush.move, null) 
+  }
+
+  xAxis.transition().duration(1000).call(d3.axisBottom(x))
+  line
+      .select('.line')
+      .transition()
+      .duration(1000)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+      )
+}
+
+svg.on("dblclick",function(){
+  x.domain(d3.extent(data, function(d) { return d.date; }))
+  xAxis.transition().call(d3.axisBottom(x))
+  line
+    .select('.line')
+    .transition()
+    .attr("d", d3.line()
+      .x(function(d) { return x(d.date) })
+      .y(function(d) { return y(d.value) })
+        )
+    });
+})
+}
+
+
+
+</script>
+
+
+</body>
